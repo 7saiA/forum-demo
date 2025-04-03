@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import telran.java57.forum.posts.dao.PostRepository;
-import telran.java57.forum.posts.dto.CommentDto;
-import telran.java57.forum.posts.dto.NewPostDto;
-import telran.java57.forum.posts.dto.PeriodDto;
-import telran.java57.forum.posts.dto.PostDto;
+import telran.java57.forum.posts.dto.*;
 import telran.java57.forum.posts.dto.exception.PostNotFoundException;
 import telran.java57.forum.posts.model.Comment;
 import telran.java57.forum.posts.model.Post;
@@ -60,42 +57,39 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public List<PostDto> findPostsById(String user) {
+    public Iterable<PostDto> findPostsByAuthor(String user) {
         return postRepository.findPostsByAuthorIgnoreCase(user)
                 .map(p -> modelMapper.map(p, PostDto.class))
                 .toList();
     }
 
     @Override
-    public PostDto addComment(String postId, String user, CommentDto commentDto) {
+    public PostDto addComment(String postId, String user, NewCommentDto newCommentDto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
-        Comment comment = new Comment(user, commentDto.getMessage());
+        Comment comment = new Comment(newCommentDto.getMessage(),user);
         post.addComment(comment);
         post = postRepository.save(post);
         return modelMapper.map(post, PostDto.class);
     }
 
     @Override
-    public List<PostDto> findPostsByTags(Set<String> tags) {
+    public Iterable<PostDto> findPostsByTags(List<String> tags) {
         return postRepository.findPostsByTagsIgnoreCaseIn(tags)
                 .map(p -> modelMapper.map(p, PostDto.class))
                 .toList();
     }
 
     @Override
-    public List<PostDto> findPostsByPeriod(PeriodDto periodDto) {
-        LocalDateTime from = LocalDateTime.parse(periodDto.getDateFrom()+"T00:00:00");
-        LocalDateTime to = LocalDateTime.parse(periodDto.getDateTo()+"T00:00:00");
-        return postRepository.findPostsByDateCreatedBetween(from,to)
+    public Iterable<PostDto> findPostsByPeriod(PeriodDto periodDto) {
+        return postRepository.findPostsByDateCreatedBetween(periodDto.getDateFrom(),periodDto.getDateTo())
                 .map(p -> modelMapper.map(p,PostDto.class))
                 .toList();
     }
 
     @Override
-    public Integer addLike(String postId) {
+    public void addLike(String postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
         post.addLike();
-        post = postRepository.save(post);
-        return post.getLikes();
+        postRepository.save(post);
     }
 }

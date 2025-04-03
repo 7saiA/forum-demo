@@ -2,15 +2,10 @@ package telran.java57.forum.posts.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import telran.java57.forum.posts.dto.CommentDto;
-import telran.java57.forum.posts.dto.NewPostDto;
-import telran.java57.forum.posts.dto.PeriodDto;
-import telran.java57.forum.posts.dto.PostDto;
+import telran.java57.forum.posts.dto.*;
 import telran.java57.forum.posts.service.PostService;
 
-import java.time.Period;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,27 +35,27 @@ public class PostController {
     }
 
     @GetMapping("/posts/author/{user}")
-    public List<PostDto> findPostsByAuthor(@PathVariable String user) {
-        return postService.findPostsById(user);
+    public Iterable<PostDto> findPostsByAuthor(@PathVariable String user) {
+        return postService.findPostsByAuthor(user);
     }
 
     @PutMapping("/post/{postId}/comment/{user}")
-    public PostDto addComment(@PathVariable String postId, @PathVariable String user, @RequestBody CommentDto commentDto) {
-        return postService.addComment(postId, user, commentDto);
+    public PostDto addComment(@PathVariable String postId, @PathVariable String user, @RequestBody NewCommentDto newCommentDto) {
+        return postService.addComment(postId, user, newCommentDto);
     }
 
     @PostMapping("/posts/tags")
-    public List<PostDto> findPostsByTags(@RequestBody Set<String> tags) {
+    public Iterable<PostDto> findPostsByTags(@RequestBody List<String> tags) {
         return postService.findPostsByTags(tags);
     }
 
     @PostMapping("/posts/period")
-    public List<PostDto> findPostsByPeriod(@RequestBody PeriodDto periodDto) {
+    public Iterable<PostDto> findPostsByPeriod(@RequestBody PeriodDto periodDto) {
         return postService.findPostsByPeriod(periodDto);
     }
 
     @PutMapping("/post/{postId}/like")
-    public Integer addLike(@PathVariable String postId) {
-        return postService.addLike(postId);
+    public void addLike(@PathVariable String postId) {
+        postService.addLike(postId);
     }
 }
